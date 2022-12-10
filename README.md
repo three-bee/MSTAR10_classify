@@ -1,6 +1,7 @@
-# MSTAR10_classify
+# MSTAR10_classify 
 SAR object classification with classical methods on MSTAR-10 class dataset.
 
+Term project of CS554 Computer Vision course at Bilkent University.
 ## Setup
 
 ### Environment 
