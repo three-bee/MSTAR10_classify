@@ -5,12 +5,23 @@ from sklearn.decomposition import PCA
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 
-if __name__ == '__main__':
-    use_PCA = True
-    dim_PCA = 60
+import argparse
+from distutils.util import strtobool
 
-    use_SARBake = False
-    case = 2
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--use_PCA', dest='use_PCA', type=lambda x: bool(strtobool(x)))
+    parser.add_argument('--dim_PCA', type=int, default=60)
+    parser.add_argument('--use_SARBake', dest='use_SARBake', type=lambda x: bool(strtobool(x)))
+    parser.add_argument('--case', type=int, help='case', default=2)
+    args = parser.parse_args()
+
+    use_PCA = args.use_PCA
+    dim_PCA = args.dim_PCA
+    use_SARBake = args.use_SARBake
+    case = args.case
+
     if use_SARBake:
         train_ds_path = "SARBake/TRAIN_17"
         test_ds_path = "SARBake/TEST_15"

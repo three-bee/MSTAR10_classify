@@ -56,11 +56,11 @@ def dwt_tresholding(coeffs, sigma_d=2, k=30, kind='soft',
 
 def dwt_denoising(im):
     LL, (LH, HL, HH) = pywt.dwt2(im,'haar')
-    coeffs = dwt_tresholding([LL, LH, HL, HH], kind='hard')
+    coeffs = dwt_tresholding([LL, LH, HL, HH], kind='hard', k=30)
     denoised = pywt.idwt2((coeffs),'haar')
     return denoised
 
-def segmentation(im, threshold=0.8):
+def segmentation(im, threshold=0.5):
     img = im
     img[img<threshold*255] = 0
     return img
@@ -238,12 +238,8 @@ def augment(img_path, ds_size=16):
     `ds_size` is the width and height for downscaling input image.
     """
     img = io.imread(img_path)
+    img = dwt_denoising(img)
     img = histogram_equalization(img)
-    img = nl_means_denoising(img)
-    
-    img = segmentation(img)
-    img = binary_close(img)
-    img = binary_open(img)
     
     if ds_size is not None:
         img = resize(img, (ds_size, ds_size))
