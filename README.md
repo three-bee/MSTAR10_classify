@@ -47,7 +47,7 @@ We also [provide the PNG target masks of SARBake](https://drive.google.com/file/
 2. **Feature extraction:** CLEAN, Gabor filters, PCA
 3. **Classification:** SVM
 
-* For CLEAN, a custom point spread function $h$ is implemented for SAR ASC[^fn3], using the bandwidth $B$, center frequency $f_c$, azimuth angle $\Theta$ and center azimuth $\theta_c$ from HDR files.:
+* For CLEAN, a custom point spread function $h$ is implemented for SAR ASC[^fn3], using the bandwidth $B$, center frequency $f_c$, azimuth angle $\Theta$ and center azimuth $\theta_c$ from HDR files:
 
 $$ CLEAN(I_{noisy}(x,y), h) = I_{clean}(x,y) $$ 
 
