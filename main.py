@@ -6,7 +6,7 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 
 if __name__ == '__main__':
-    use_PCA = True
+    use_PCA = False
     dim_PCA = 60
 
     use_SARBake = False

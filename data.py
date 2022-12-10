@@ -25,7 +25,7 @@ def read_azimuth_angles(header_path):
     angle = float(line.split('=')[-1])
     return angle
 
-def generate_CLEAN_images(header_path, clean_oriented_imgs=True, write_imgs=True, apply_preprocess=True):
+def generate_CLEAN_images(header_path, clean_oriented_imgs=False, write_imgs=False, apply_preprocess=False):
     """
     Extracts azimuth angle from `header_path`, generates PSF with the extracted parameters, 
     applies CLEAN deconvolution algorithm, and writes the CLEANed images to the same path as `header_path`.
@@ -35,18 +35,23 @@ def generate_CLEAN_images(header_path, clean_oriented_imgs=True, write_imgs=True
     else: # Target azimuth angle is oriented already, CLEAN oriented images
         angle = 2*np.pi
 
-    try: # Classes with JPEG images have an additional sub-folder, JPG ones do not
-        img_path = '.'.join(header_path.split('.')[:-1])+'.jpeg'
-    except:
-        img_path = '.'.join(header_path.split('.')[:-2])+'.JPG'
-    
+    if not clean_oriented_imgs:
+        try: # Classes with JPEG images have an additional sub-folder, JPG ones do not
+            img_path = '.'.join(header_path.split('.')[:-1])+'.jpeg'
+        except:
+            img_path = '.'.join(header_path.split('.')[:-2])+'.JPG'
+    else:
+        try:
+            img_path = '.'.join(header_path.split('.')[:-1])+'.ornt.jpeg'
+        except:
+            img_path = '.'.join(header_path.split('.')[:-2])+'.ornt.JPG'
    
     splitted_path = img_path.split('.')
     target_path = ('.'.join(splitted_path[:-1])+'.CLEANed.'+splitted_path[-1])
     
     img = io.imread(img_path)
     if apply_preprocess:
-        img = preprocess.histogram_equalization(img)
+        img = preprocess.dwt_denoising(img)
     print(f"Read image: {img_path}")
 
     # CLEAN process

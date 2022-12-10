@@ -237,6 +237,8 @@ def augment(img_path, ds_size=16):
     `ds_size` is the width and height for downscaling input image.
     """
     img = io.imread(img_path)
+    img = dwt_denoising(img)
+    img = histogram_equalization(img)
     if ds_size is not None:
         img = resize(img, (ds_size, ds_size))
     features = img.flatten()
