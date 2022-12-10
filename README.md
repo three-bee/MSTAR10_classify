@@ -46,7 +46,7 @@ We also [provide the PNG target masks of SARBake](https://drive.google.com/file/
 2. **Feature extraction:** CLEAN, Gabor filters, PCA
 3. **Classification:** SVM
 
-* For CLEAN, a custom point spread function formula is implemented [^fn3], using the metadata from HDR files. 
+* For CLEAN, a custom point spread function formula is implemented[^fn3], using the parsed metadata from HDR files. 
 
 * We observe that downscaling to 16x16 + setting all azimuth angles to 0 (image rotation) + histogram equalization + DWT denoising + 60-dim PCA features + SVM combination yields the highest accuracy (98.9%) among all tried combinations.
 
@@ -80,23 +80,7 @@ We also [provide the PNG target masks of SARBake](https://drive.google.com/file/
     │   ├── ZIL131
     │   └── ZSU_23_4
     └── TRAIN_17
-        ├── 2S1
-        ├── BMP2
-        │   ├── SN_9563
-        │   ├── SN_9566
-        │   └── SN_C21
-        ├── BRDM_2
-        ├── BTR_60
-        ├── BTR70
-        │   └── SN_C71
-        ├── D7
-        ├── T62
-        ├── T72
-        │   ├── SN_132
-        │   ├── SN_812
-        │   └── SN_S7
-        ├── ZIL131
-        └── ZSU_23_4
+        └── Same layout as TEST_15
 ```
 * `python3 main.py --use_PCA=true --use_SARBake=false --case=2`
 
