@@ -47,7 +47,15 @@ We also [provide the PNG target masks of SARBake](https://drive.google.com/file/
 2. **Feature extraction:** CLEAN, Gabor filters, PCA
 3. **Classification:** SVM
 
-* For CLEAN, a custom point spread function formula is implemented[^fn3], using the parsed metadata from HDR files. 
+* For CLEAN, a custom point spread function $h$ is implemented for SAR ASC[^fn3], using the bandwidth $B$, center frequency $f_c$, azimuth angle $\Theta$ and center azimuth $\theta_c$ from HDR files.:
+
+$$ CLEAN(I_{noisy}(x,y), h) = I_{clean}(x,y) $$ 
+
+$$ I_{clean}(x,y) = \Sigma_{n=1}^{N}A_N h(x-x_n, y-y_n) $$
+
+$$ h(x,y) = e^{\frac{j 4 \pi f_c}{c}{(x+\theta_c y)}}{\frac{4 f_c B \Theta}{c^2}} sinc(\frac{2B}{c}x) sinc(\frac{2 f_c \Theta}{c}y) \omega(x,y) $$
+
+$\omega$ is the -35dB Taylor window function that was originally utilized while collecting the MSTAR data.
 
 * We observe that downscaling to 16x16 + setting all azimuth angles to 0 (image rotation) + histogram equalization + DWT denoising + 60-dim PCA features + SVM combination yields the highest accuracy (98.9%) among all tried combinations.
 
