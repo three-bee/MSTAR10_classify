@@ -7,6 +7,7 @@ SAR object classification with classical methods on MSTAR-10 class dataset.
 ```
 python 3.7.10
 numpy==1.19.1
+opencv-python==4.5.1
 Pillow==9.3.0
 PyWavelets==1.1.1
 scikit_image==0.17.2
