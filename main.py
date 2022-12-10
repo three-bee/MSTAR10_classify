@@ -6,11 +6,11 @@ from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
 
 if __name__ == '__main__':
-    use_PCA = False
+    use_PCA = True
     dim_PCA = 60
 
     use_SARBake = False
-    case = 4
+    case = 2
     if use_SARBake:
         train_ds_path = "SARBake/TRAIN_17"
         test_ds_path = "SARBake/TEST_15"
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         test_ds_path = "dataset/TEST_15"
 
     if use_PCA:
-        pca = PCA(n_components=dim_PCA)
+        pca = PCA(n_components=dim_PCA, svd_solver="arpack")
         train_imgs, train_labels = create_dataset(train_ds_path, case=case, augment=augment)
         print("Created training dataset.")
         

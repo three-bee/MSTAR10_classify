@@ -10,18 +10,18 @@ from scipy.ndimage.filters import gaussian_filter
 from scipy import signal
 
 def adaptive_histogram_equalization(im):
-    im = (im*255).astype(np.uint8)
+    im = im.astype(np.uint8)
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
     adaptive = clahe.apply(im)
     return adaptive
 
 def histogram_equalization(im):
-    im = (im*255).astype(np.uint8)
+    im = im.astype(np.uint8)
     equalized = cv2.equalizeHist(im)
     return equalized
 
 def nl_means_denoising(im):
-    im = (im * 255).astype(np.uint8)
+    im = im.astype(np.uint8)
     im = cv2.fastNlMeansDenoising(im)
     return im
 
@@ -56,13 +56,14 @@ def dwt_tresholding(coeffs, sigma_d=2, k=30, kind='soft',
 
 def dwt_denoising(im):
     LL, (LH, HL, HH) = pywt.dwt2(im,'haar')
-    coeffs = dwt_tresholding([LL, LH, HL, HH])
+    coeffs = dwt_tresholding([LL, LH, HL, HH], kind='hard')
     denoised = pywt.idwt2((coeffs),'haar')
     return denoised
 
-def segmentation(im):
-    predicted = np.uint8(im>0.75*255)
-    return predicted
+def segmentation(im, threshold=0.8):
+    img = im
+    img[img<threshold*255] = 0
+    return img
 
 def binary_open(im):
     kernel = np.ones((4,4),np.uint8)
@@ -71,7 +72,7 @@ def binary_open(im):
 
 def binary_close(im):
     kernel = np.ones((4,4),np.uint8)
-    closed = cv2.morphologyEx(im, cv2.MORPH_OPEN, kernel)
+    closed = cv2.morphologyEx(im, cv2.MORPH_CLOSE, kernel)
     return closed
 
 # https://github.com/vit1-irk/clean_lib
@@ -237,8 +238,13 @@ def augment(img_path, ds_size=16):
     `ds_size` is the width and height for downscaling input image.
     """
     img = io.imread(img_path)
-    img = dwt_denoising(img)
     img = histogram_equalization(img)
+    img = nl_means_denoising(img)
+    
+    img = segmentation(img)
+    img = binary_close(img)
+    img = binary_open(img)
+    
     if ds_size is not None:
         img = resize(img, (ds_size, ds_size))
     features = img.flatten()

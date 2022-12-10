@@ -273,5 +273,6 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
     return features_list, labels
 
 if __name__=='__main__':
-    process_dataset("dataset/TRAIN_17", extension='hdr', transform=generate_CLEAN_images)
+    pass
+    #process_dataset("dataset/TRAIN_17", extension='hdr', transform=generate_CLEAN_images)
     #modify_dataset("/home/batu/Desktop/554_PROJECT/SARBake", generate_mask_from_csv)
