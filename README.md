@@ -102,6 +102,8 @@ $\omega$ is the -35dB Taylor window function that was originally utilized while 
     * `case=4` : Read vanilla MSTAR images
     * `case=5` : Read png-converted csv masks of SARBake overlays
 
+* To change the augmentation type, you may change the `aug_args` list, while referring to the `generate_ablation_params` function in `main.py`.
+
 [^fn1]: Malmgren-Hansen, David; Nobel-Jørgensen, Morten (2017), “SARBake Overlays for the MSTAR Dataset”, Mendeley Data, V3, doi: 10.17632/jxhsg8tj7g.3
 [^fn2]: https://github.com/vit1-irk/clean_lib
 [^fn3]: L. C. Potter and R. L. Moses, "Attributed scattering centers for SAR ATR," in IEEE Transactions on Image Processing, vol. 6, no. 1, pp. 79-91, Jan. 1997, doi: 10.1109/83.552098.
