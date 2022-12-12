@@ -72,6 +72,7 @@ if __name__ == '__main__':
         svc.fit(reduced_train_imgs, train_labels)
         pred_labels = svc.predict(reduced_test_imgs)
         acc = accuracy_score(pred_labels, test_labels)
+        print(acc)
     else:
         train_imgs, train_labels = create_dataset(train_ds_path, case=case, augment=augment_changeable, augment_args=aug_args)
         print("Created training dataset.")
@@ -83,3 +84,4 @@ if __name__ == '__main__':
         svc.fit(train_imgs, train_labels)
         pred_labels = svc.predict(test_imgs)
         acc = accuracy_score(pred_labels, test_labels)
+        print(acc)
