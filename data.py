@@ -25,7 +25,7 @@ def read_azimuth_angles(header_path):
     angle = float(line.split('=')[-1])
     return angle
 
-def generate_CLEAN_images(header_path, clean_oriented_imgs=False, write_imgs=False, apply_preprocess=False):
+def generate_CLEAN_images(header_path, clean_oriented_imgs=False, write_imgs=True, apply_preprocess=False):
     """
     Extracts azimuth angle from `header_path`, generates PSF with the extracted parameters, 
     applies CLEAN deconvolution algorithm, and writes the CLEANed images to the same path as `header_path`.
@@ -38,18 +38,21 @@ def generate_CLEAN_images(header_path, clean_oriented_imgs=False, write_imgs=Fal
     if not clean_oriented_imgs:
         try: # Classes with JPEG images have an additional sub-folder, JPG ones do not
             img_path = '.'.join(header_path.split('.')[:-1])+'.jpeg'
+            img = io.imread(img_path)
         except:
             img_path = '.'.join(header_path.split('.')[:-2])+'.JPG'
+            img = io.imread(img_path)
     else:
         try:
             img_path = '.'.join(header_path.split('.')[:-1])+'.ornt.jpeg'
+            img = io.imread(img_path)
         except:
             img_path = '.'.join(header_path.split('.')[:-2])+'.ornt.JPG'
+            img = io.imread(img_path)
    
     splitted_path = img_path.split('.')
     target_path = ('.'.join(splitted_path[:-1])+'.CLEANed.'+splitted_path[-1])
     
-    img = io.imread(img_path)
     if apply_preprocess:
         img = preprocess.dwt_denoising(img)
     print(f"Read image: {img_path}")
@@ -58,7 +61,7 @@ def generate_CLEAN_images(header_path, clean_oriented_imgs=False, write_imgs=Fal
     fc = 9.599000*1e9 #ghz->hz, center frequency
     B = 0.591*1e9 #ghz->hz, bandwidth
     psf_real = preprocess.create_ASC_PSF(img=img, fc=fc, B=B, az=angle)
-    clean = preprocess.run_CLEAN(img=img, PSF=psf_real, blurrad_w1=2, gamma_w1=0.6, bottomlimit=0.01)
+    clean = preprocess.run_CLEAN(img=img, PSF=psf_real)
 
     print(f"Cleaned: {img_path}")
     if write_imgs:
@@ -101,14 +104,15 @@ def orient_imgs(header_path):
 
     try: # Classes with JPEG images have an additional sub-folder, JPG ones do not
         img_path = '.'.join(header_path.split('.')[:-1])+'.jpeg'
+        img = io.imread(img_path)
     except:
         img_path = '.'.join(header_path.split('.')[:-2])+'.JPG'
+        img = io.imread(img_path)
     
     splitted_path = img_path.split('.')
     target_path = ('.'.join(splitted_path[:-1])+'.ornt.'+splitted_path[-1])
     print(target_path)
 
-    img = io.imread(img_path)
     img_rotated = nd.rotate(img, angle, reshape=False)
     cv2.imwrite(target_path, img_rotated)
 
@@ -133,7 +137,7 @@ def process_dataset(ds_folder, extension, transform):
             if ext == extension:
                 transform(os.path.join(path, file))
 
-def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
+def create_dataset(ds_folder, augment, augment_args=None, case=4, shuffle_ds=True):
     """
     Creates the a dataset (images, labels) iterating all subfolders in MSTAR `ds_folder`.
     
@@ -221,14 +225,14 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
             ext_with_flag = file.split('.')[-3:-1]
             if ext == 'hdr':
                 if case == 0:
-                    augment(os.path.join(path, file))
+                    augment(os.path.join(path, file), *augment_args)
                     extract_labels()
                     continue
             elif ext == 'jpeg' or ext == 'JPG':
                 # Only CLEANed images
                 if ext_with_flag[-1] == 'CLEANed' and ext_with_flag[-2] != 'ornt': 
                     if case == 1:
-                        features = augment(os.path.join(path, file))
+                        features = augment(os.path.join(path, file), *augment_args)
                         features_list.append(features)
                         label = extract_labels()
                         labels.append(classes.index(label))
@@ -236,7 +240,7 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
                 # Only oriented images
                 elif ext_with_flag[-1] == 'ornt': 
                     if case == 2:
-                        features = augment(os.path.join(path, file))
+                        features = augment(os.path.join(path, file), *augment_args)
                         features_list.append(features)
                         label = extract_labels()
                         labels.append(classes.index(label))
@@ -244,7 +248,7 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
                 # Both oriented and CLEANed images
                 elif '.'.join(ext_with_flag) == 'ornt.CLEANed': 
                     if case == 3:
-                        features = augment(os.path.join(path, file))
+                        features = augment(os.path.join(path, file), *augment_args)
                         features_list.append(features)
                         label = extract_labels()
                         labels.append(classes.index(label))
@@ -252,7 +256,7 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
                 # Original MSTAR images
                 else:  
                     if case == 4:
-                        features = augment(os.path.join(path, file))
+                        features = augment(os.path.join(path, file), *augment_args)
                         features_list.append(features)
                         label = extract_labels()
                         labels.append(classes.index(label))
@@ -262,7 +266,7 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
                 # *.png versions of the *.csv segmentation masks (outputs of generate_mask_from_csv function)
                 if ext_with_flag[-1] == 'target':
                     if case == 5:
-                        features = augment(os.path.join(path, file))
+                        features = augment(os.path.join(path, file), *augment_args)
                         features_list.append(features)
                         label = extract_labels()
                         labels.append(classes.index(label))
@@ -273,6 +277,6 @@ def create_dataset(ds_folder, augment, case=4, shuffle_ds=True):
     return features_list, labels
 
 if __name__=='__main__':
-    pass
-    #process_dataset("dataset/TRAIN_17", extension='hdr', transform=generate_CLEAN_images)
-    #modify_dataset("SARBake/TEST_15", generate_mask_from_csv)
+    generate_CLEAN_images("dataset/TRAIN_17/2S1/HB19379.000.hdr", False)
+    process_dataset("dataset/TRAIN_17", extension='hdr', transform=generate_CLEAN_images)
+    process_dataset("dataset/TEST_15", extension='hdr', transform=generate_CLEAN_images)

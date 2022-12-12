@@ -56,7 +56,7 @@ def dwt_tresholding(coeffs, sigma_d=2, k=30, kind='soft',
 
 def dwt_denoising(im):
     LL, (LH, HL, HH) = pywt.dwt2(im,'haar')
-    coeffs = dwt_tresholding([LL, LH, HL, HH], kind='hard', k=30)
+    coeffs = dwt_tresholding([LL, LH, HL, HH], kind='soft', k=30)
     denoised = pywt.idwt2((coeffs),'haar')
     return denoised
 
@@ -201,7 +201,7 @@ def create_ASC_PSF(img, fc, B, az):
     """
     # CLEAN parameters
     c = 3*1e8 #m/s, speed of light
-    omega = az/180*np.pi # degrees->radians, azimuth aperture
+    omega = az*np.pi/180 # degrees->radians, azimuth aperture
     
     # Create point spread function
     h,w = img.shape
@@ -214,14 +214,13 @@ def create_ASC_PSF(img, fc, B, az):
 
     # Use -35dB Taylor window since it was also used while the MSTAR dataset was being collected
     taylor_window = signal.windows.taylor(h, sll=35)
-    t = taylor_window[x]*np.transpose(taylor_window[y])
+    t = taylor_window[x-h//2]*np.transpose(taylor_window[y-h//2])
     psf = np.exp(1j*4*np.pi*fc/c*((x-w//2)+15*np.pi/180*(y-w//2))) * (4*fc*B*omega/(c**2)) * np.sinc((2*B/c*(x-w//2))/np.pi) * np.sinc((2*fc*omega/c*(y-w//2))/np.pi)
     psf = psf * t
     psf_real = np.real(psf)
-    
     return psf_real
 
-def run_CLEAN(img, PSF, blurrad_w1=2, bottomlimit=0.01, gamma_w1=0.6):
+def run_CLEAN(img, PSF, blurrad_w1=2, bottomlimit=0.001, gamma_w1=0.6):
     """
     Uses the CLEAN deconvolution algorithm from https://github.com/vit1-irk/clean_lib
     
@@ -229,7 +228,7 @@ def run_CLEAN(img, PSF, blurrad_w1=2, bottomlimit=0.01, gamma_w1=0.6):
     
     A suitable PSF choice for SAR imaging would be attributed scattering center PSFs.
     """
-    clean, dirtyoutput = makeClean(img, PSF, blurrad_w1, bottomlimit, maxit=100, gamma=gamma_w1, criticalbottom=None)
+    clean, dirtyoutput = makeClean(img, PSF, blurrad_w1, bottomlimit, maxit=50, gamma=gamma_w1, criticalbottom=None)
     return clean
 
 def augment(img_path, ds_size=16):
@@ -245,6 +244,35 @@ def augment(img_path, ds_size=16):
         img = resize(img, (ds_size, ds_size))
     features = img.flatten()
     return features
+
+
+def augment_changeable(img_path, ds_size=16, denoiser="DWT", heq="HE", segment=False):
+    """
+    Used by `create_dataset` function in data.py.
+    `ds_size` is the width and height for downscaling input image.
+    """
+    img = io.imread(img_path)
+
+    if denoiser == "DWT":
+        img = dwt_denoising(img)
+    elif denoiser == "NL":
+        img = nl_means_denoising(img)
+
+    if heq == "HE":
+        img = histogram_equalization(img)
+    elif heq == "CLAHE":
+        img = adaptive_histogram_equalization(img)
+    
+    if segment:
+        img = segmentation(img)
+        img = binary_open(img)
+        img = binary_close(img)
+
+    if ds_size is not None:
+        img = resize(img, (ds_size, ds_size))
+    features = img.flatten()
+    return features
+
 
 if __name__ == '__main__':
     img_path = "dataset/TEST_15/2S1/HB14931.ornt.JPG"
