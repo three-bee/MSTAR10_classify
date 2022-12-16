@@ -18,7 +18,7 @@ skimage==0.0
 ```
 ### Manual dataset creation
 **Public SDMS MSTAR dataset** can be downloaded from [this](https://www.sdms.afrl.af.mil/index.php?collection=public-data&page=public-data-list) link. 
-* There is not an already prepared 10-class dataset of MSTAR. You need to download **MSTAR Clutter** and **MSTAR Target Chips (T72 BMP2 BTR70 SLICY)**, extract 10 classes *(2S1, BMP2, BDRM_2, BTR70, D7, T62, T72, ZIL131, ZSU_23_4, BTR_60)* according to their test (15 degree azimuth angle) and train (17 degree azimuth angle) sets.
+* There is not an already prepared 10-class dataset of MSTAR. You need to download **MSTAR Clutter** and **MSTAR Target Chips (T72 BMP2 BTR70 SLICY)**, extract 10 classes *(2S1, BMP2, BDRM_2, BTR70, D7, T62, T72, ZIL131, ZSU_23_4, BTR_60)* according to their test (15 degree depression angle) and train (17 degree depression angle) sets.
 
 * After organizing the 10-class RAW files, extract JPEG, HDR and MAG files using the [MSTAR PUBLIC TOOLS](https://www.sdms.afrl.af.mil/index.php?collection=tools_mstar). You may modify the provided `generate_hdr_mag.bash` and use for batch processing.
 
